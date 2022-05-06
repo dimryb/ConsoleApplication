@@ -2,10 +2,14 @@
 //
 
 #include <iostream>
+#include "adapter.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    std::cout << "Start!\n";
+    adapter();
+    std::cout << "Stop!\n";
+    return 1;
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"

@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\work\visualStudioCodeTests\ConsoleApplication\mbedtls\include;C:\work\visualStudioCodeTests\ConsoleApplication;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -139,7 +140,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="adapter.c" />
     <ClCompile Include="ConsoleApplication.cpp" />
+    <ClCompile Include="mbedtls\library\bignum.c" />
+    <ClCompile Include="mbedtls\library\constant_time.c" />
+    <ClCompile Include="mbedtls\library\md.c" />
+    <ClCompile Include="mbedtls\library\oid.c" />
+    <ClCompile Include="mbedtls\library\platform_util.c" />
+    <ClCompile Include="mbedtls\library\rsa.c" />
+    <ClCompile Include="mbedtls\library\rsa_internal.c" />
+    <ClCompile Include="mbedtls\programs\pkey\rsa_decrypt.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

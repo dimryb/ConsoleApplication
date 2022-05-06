@@ -13,10 +13,43 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\mbedtls">
+      <UniqueIdentifier>{a8f607a6-f0f4-498e-b211-a51dfead9c9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\mbedtls\library">
+      <UniqueIdentifier>{73e5d741-aa8e-465c-b613-f7f29abd6b51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleApplication.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\programs\pkey\rsa_decrypt.c">
+      <Filter>Исходные файлы\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\rsa.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\bignum.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\constant_time.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\platform_util.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\md.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\rsa_internal.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
+    </ClCompile>
+    <ClCompile Include="adapter.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls\library\oid.c">
+      <Filter>Исходные файлы\mbedtls\library</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
