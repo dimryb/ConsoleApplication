@@ -8,7 +8,7 @@ void adapter() {
 	int verbose = 1;
 	int result = mbedtls_rsa_self_test(verbose);
 
-	result = rsa_test(verbose);
+	result = rsa_test();
 }
 
 int (*mbedtls_snprintf)(char* s, size_t n, const char* format, ...) = snprintf;

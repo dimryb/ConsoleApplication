@@ -32,6 +32,10 @@
 #define RSA_P   "EA11BBF294D7FE47F0A18C39E0DA79D347EB677ECDD2FA1184C9C5C8D3F405D9C89AE117EFC9C86748782BAB5BF68FBD0EEF364D525EE937A4B1F98EA0077EA0BB531DFF35FF28BEAEC5844A1C293B5C94CB435A455D5770DD80E5E56E661D0F028DBAF63C5B97E0528829F5EA0AD0514CDBD0E0BDC7BE4A46867C70DC01686D"
 
 #define RSA_Q   "C8F7A397EE2A26A434A12F36D8CAAE296306A4992EF5D8EB79645969565824103312A45E31FA6F800EC3D98C344BFA2DA4563E98E1D8C7CF328D4D3FDD1C01D7946A35733398788351BD7A8F1572852BA009A5DA4701CB39BA4B2B90811C0B80D4B28B6D5BD7C07616A56CF4F474AF35D2AA0A33144F8A250F3B20EDAF4B9D37"
+
+#define PT_LEN  11
+#define RSA_PT  "Hello RSA!"
+
 #else
 #define KEY_LEN 128
 
@@ -64,11 +68,13 @@
                 "E211C2B9E5DB1ED0BF61D0D9899620F4" \
                 "910E4168387E3C30AA1E00C339A79508" \
                 "8452DD96A9A5EA5D9DCA68DA636032AF"
-#endif
 
 #define PT_LEN  24
 #define RSA_PT  "\xAA\xBB\xCC\x03\x02\x01\x00\xFF\xFF\xFF\xFF\xFF" \
                 "\x11\x22\x33\x0A\x0B\x0C\xCC\xDD\xDD\xDD\xDD\xDD"
+#endif
+
+
 
 #if defined(MBEDTLS_PKCS1_V15)
 static int myrand(void* rng_state, unsigned char* output, size_t len)
@@ -79,16 +85,76 @@ static int myrand(void* rng_state, unsigned char* output, size_t len)
         rng_state = NULL;
 
     for (i = 0; i < len; ++i)
-        output[i] = rand();
+        output[i] = 45; rand();
 
     return(0);
 }
 #endif /* MBEDTLS_PKCS1_V15 */
 
+int rsa_importKey(mbedtls_rsa_context* rsa, const char* strN, const char* strP, const char* strQ, const char* strD, const char* strE) {
+    int ret = 0;
+    mbedtls_mpi K;
+
+    mbedtls_printf("  RSA key import: ");
+
+    mbedtls_mpi_init(&K);
+    mbedtls_rsa_init(rsa, MBEDTLS_RSA_PKCS_V15, 0);
+
+    ret |= mbedtls_mpi_read_string(&K, 16, strN);
+    ret |= mbedtls_rsa_import(rsa, &K, NULL, NULL, NULL, NULL);
+    ret |= mbedtls_mpi_read_string(&K, 16, strP);
+    ret |= mbedtls_rsa_import(rsa, NULL, &K, NULL, NULL, NULL);
+    ret |= mbedtls_mpi_read_string(&K, 16, strQ);
+    ret |= mbedtls_rsa_import(rsa, NULL, NULL, &K, NULL, NULL);
+    ret |= mbedtls_mpi_read_string(&K, 16, strD);
+    ret |= mbedtls_rsa_import(rsa, NULL, NULL, NULL, &K, NULL);
+    ret |= mbedtls_mpi_read_string(&K, 16, strE);
+    ret |= mbedtls_rsa_import(rsa, NULL, NULL, NULL, NULL, &K);
+
+    ret |= mbedtls_rsa_complete(rsa);
+
+    mbedtls_mpi_free(&K);
+
+    if (ret) {
+        mbedtls_printf("failed\n");
+    } else {
+        mbedtls_printf("passed\n");
+    }
+
+    return ret;
+}
+
+int rsa_keyValidation(mbedtls_rsa_context* rsa) {
+    int ret = 0;
+    mbedtls_printf("  RSA key validation: ");
+
+    if (mbedtls_rsa_check_pubkey(rsa) != 0 ||
+        mbedtls_rsa_check_privkey(rsa) != 0) {
+        mbedtls_printf("failed\n");
+        ret |= 1;
+    }
+    else {
+        mbedtls_printf("passed\n");
+    }
+
+    return ret;
+}
+
+int rsa_encrypt(mbedtls_rsa_context *rsa, size_t len, unsigned char *rsa_plaintext, unsigned char* rsa_ciphertext) {
+    mbedtls_printf("  PKCS#1 encryption : ");
+    int ret = mbedtls_rsa_pkcs1_encrypt(rsa, myrand, NULL, MBEDTLS_RSA_PUBLIC, len, rsa_plaintext,  rsa_ciphertext);
+    if (ret == 0) {
+        mbedtls_printf("passed, MSG: %s\n", rsa_plaintext);
+    } else {
+        mbedtls_printf("failed\n");
+    }
+    return ret;
+}
+
 /*
  * Checkup routine
  */
-int rsa_test(int verbose)
+int rsa_test()
 {
     int ret = 0;
 #if defined(MBEDTLS_PKCS1_V15)
@@ -98,62 +164,30 @@ int rsa_test(int verbose)
     unsigned char rsa_decrypted[PT_LEN];
     unsigned char rsa_ciphertext[KEY_LEN];
 
-    mbedtls_mpi K;
-
-    mbedtls_mpi_init(&K);
-    mbedtls_rsa_init(&rsa, MBEDTLS_RSA_PKCS_V15, 0);
-
-    MBEDTLS_MPI_CHK(mbedtls_mpi_read_string(&K, 16, RSA_N));
-    MBEDTLS_MPI_CHK(mbedtls_rsa_import(&rsa, &K, NULL, NULL, NULL, NULL));
-    MBEDTLS_MPI_CHK(mbedtls_mpi_read_string(&K, 16, RSA_P));
-    MBEDTLS_MPI_CHK(mbedtls_rsa_import(&rsa, NULL, &K, NULL, NULL, NULL));
-    MBEDTLS_MPI_CHK(mbedtls_mpi_read_string(&K, 16, RSA_Q));
-    MBEDTLS_MPI_CHK(mbedtls_rsa_import(&rsa, NULL, NULL, &K, NULL, NULL));
-    MBEDTLS_MPI_CHK(mbedtls_mpi_read_string(&K, 16, RSA_D));
-    MBEDTLS_MPI_CHK(mbedtls_rsa_import(&rsa, NULL, NULL, NULL, &K, NULL));
-    MBEDTLS_MPI_CHK(mbedtls_mpi_read_string(&K, 16, RSA_E));
-    MBEDTLS_MPI_CHK(mbedtls_rsa_import(&rsa, NULL, NULL, NULL, NULL, &K));
-
-    MBEDTLS_MPI_CHK(mbedtls_rsa_complete(&rsa));
-
-    if (verbose != 0)
-        mbedtls_printf("  RSA key validation: ");
-
-    if (mbedtls_rsa_check_pubkey(&rsa) != 0 ||
-        mbedtls_rsa_check_privkey(&rsa) != 0)
-    {
-        if (verbose != 0)
-            mbedtls_printf("failed\n");
-
+    if (rsa_importKey(&rsa, RSA_N, RSA_P, RSA_Q, RSA_D, RSA_E) != 0) {
         ret = 1;
         goto cleanup;
     }
 
-    if (verbose != 0)
-        mbedtls_printf("passed\n  PKCS#1 encryption : ");
+    if (rsa_keyValidation(&rsa) != 0) {
+        ret = 1;
+        goto cleanup;
+    }
 
     memcpy(rsa_plaintext, RSA_PT, PT_LEN);
 
-    if (mbedtls_rsa_pkcs1_encrypt(&rsa, myrand, NULL, MBEDTLS_RSA_PUBLIC,
-        PT_LEN, rsa_plaintext,
-        rsa_ciphertext) != 0)
-    {
-        if (verbose != 0)
-            mbedtls_printf("failed\n");
-
+    if (rsa_encrypt(&rsa, PT_LEN, rsa_plaintext, rsa_ciphertext) != 0) {
         ret = 1;
         goto cleanup;
     }
 
-    if (verbose != 0)
-        mbedtls_printf("passed\n  PKCS#1 decryption : ");
+    mbedtls_printf("  PKCS#1 decryption : ");
 
     if (mbedtls_rsa_pkcs1_decrypt(&rsa, myrand, NULL, MBEDTLS_RSA_PRIVATE,
         &len, rsa_ciphertext, rsa_decrypted,
         sizeof(rsa_decrypted)) != 0)
     {
-        if (verbose != 0)
-            mbedtls_printf("failed\n");
+        mbedtls_printf("failed\n");
 
         ret = 1;
         goto cleanup;
@@ -161,22 +195,16 @@ int rsa_test(int verbose)
 
     if (memcmp(rsa_decrypted, rsa_plaintext, len) != 0)
     {
-        if (verbose != 0)
-            mbedtls_printf("failed\n");
+        mbedtls_printf("failed\n");
 
         ret = 1;
         goto cleanup;
     }
 
-    if (verbose != 0)
-        mbedtls_printf("passed\n");
+    mbedtls_printf("passed, MSG: %s\n", rsa_decrypted);
+    mbedtls_printf("\n");
 
-
-    if (verbose != 0)
-        mbedtls_printf("\n");
-
-cleanup:
-    mbedtls_mpi_free(&K);
+cleanup:    
     mbedtls_rsa_free(&rsa);
 
 #endif

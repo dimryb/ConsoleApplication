@@ -9,7 +9,7 @@ int main()
     std::cout << "Start!\n";
     adapter();
     std::cout << "Stop!\n";
-    return 1;
+    return 0;
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
