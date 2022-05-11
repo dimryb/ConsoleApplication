@@ -85,7 +85,7 @@ static int myrand(void* rng_state, unsigned char* output, size_t len)
         rng_state = NULL;
 
     for (i = 0; i < len; ++i)
-        output[i] = 45; rand();
+        output[i] = rand();
 
     return(0);
 }
@@ -142,13 +142,36 @@ int rsa_keyValidation(mbedtls_rsa_context* rsa) {
 
 int rsa_encrypt(mbedtls_rsa_context *rsa, size_t len, unsigned char *rsa_plaintext, unsigned char* rsa_ciphertext) {
     mbedtls_printf("  PKCS#1 encryption : ");
-    int ret = mbedtls_rsa_pkcs1_encrypt(rsa, myrand, NULL, MBEDTLS_RSA_PUBLIC, len, rsa_plaintext,  rsa_ciphertext);
-    if (ret == 0) {
-        mbedtls_printf("passed, MSG: %s\n", rsa_plaintext);
-    } else {
+    if (mbedtls_rsa_pkcs1_encrypt(rsa, myrand, NULL, MBEDTLS_RSA_PUBLIC, len, rsa_plaintext, rsa_ciphertext) != 0 ) {
         mbedtls_printf("failed\n");
+        return 1;        
     }
-    return ret;
+
+    mbedtls_printf("passed, MSG: %s\n", rsa_plaintext);
+    return 0;
+}
+
+int rsa_decrypt(mbedtls_rsa_context* rsa, size_t *len, unsigned char* rsa_ciphertext, unsigned char* rsa_decrypted, size_t output_max_len) {
+    mbedtls_printf("  PKCS#1 decryption : ");
+    if (mbedtls_rsa_pkcs1_decrypt(rsa, myrand, NULL, MBEDTLS_RSA_PRIVATE,
+        len, rsa_ciphertext, rsa_decrypted, output_max_len) != 0) {
+        mbedtls_printf("failed\n");
+        return 1;
+    }
+
+    mbedtls_printf("passed, MSG: %s\n", rsa_decrypted);
+    return 0;
+}
+
+int rsa_checkup(unsigned char* rsa_plaintext, unsigned char* rsa_decrypted, size_t len) {
+    mbedtls_printf("  PKCS#1 checkup: ");
+    if (memcmp(rsa_decrypted, rsa_plaintext, len) != 0) {
+        mbedtls_printf("failed\n");
+        return 1;
+    }
+
+    mbedtls_printf("passed, MSG: %s\n", rsa_decrypted);    
+    return 0;
 }
 
 /*
@@ -181,32 +204,20 @@ int rsa_test()
         goto cleanup;
     }
 
-    mbedtls_printf("  PKCS#1 decryption : ");
-
-    if (mbedtls_rsa_pkcs1_decrypt(&rsa, myrand, NULL, MBEDTLS_RSA_PRIVATE,
-        &len, rsa_ciphertext, rsa_decrypted,
-        sizeof(rsa_decrypted)) != 0)
-    {
-        mbedtls_printf("failed\n");
-
+    if (rsa_decrypt(&rsa, &len, rsa_ciphertext, rsa_decrypted, sizeof(rsa_decrypted)) != 0) {
         ret = 1;
         goto cleanup;
     }
 
-    if (memcmp(rsa_decrypted, rsa_plaintext, len) != 0)
-    {
-        mbedtls_printf("failed\n");
-
+    if (rsa_checkup(rsa_plaintext, rsa_decrypted, len) != 0) {
         ret = 1;
         goto cleanup;
     }
 
-    mbedtls_printf("passed, MSG: %s\n", rsa_decrypted);
     mbedtls_printf("\n");
 
 cleanup:    
     mbedtls_rsa_free(&rsa);
-
 #endif
 
     return(ret);
