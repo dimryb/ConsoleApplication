@@ -150,6 +150,10 @@
     <ClCompile Include="mbedtls\library\rsa.c" />
     <ClCompile Include="mbedtls\library\rsa_internal.c" />
     <ClCompile Include="mbedtls\programs\pkey\rsa_decrypt.c" />
+    <ClCompile Include="rsaTest.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="rsaTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

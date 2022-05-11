@@ -51,5 +51,13 @@
     <ClCompile Include="mbedtls\library\oid.c">
       <Filter>Исходные файлы\mbedtls\library</Filter>
     </ClCompile>
+    <ClCompile Include="rsaTest.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="rsaTest.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
